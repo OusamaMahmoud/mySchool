@@ -1,39 +1,50 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 export const apiClient = axios.create({
   baseURL: "https://localhost:7272/api",
 });
 
-// Request Interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Retrieve the token from local storage or any other place you store it
     const token = localStorage.getItem("authToken");
-
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
     } else {
-      console.log("yyuyuyuyu");
+      // No token found, redirect to login or handle it gracefully
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+        return Promise.reject(
+          new Error("No auth token, redirecting to login.")
+        );
+      }
     }
     return config;
   },
   (error) => {
-    return Promise.reject(error);
+    // Ensure the rejection reason is an Error object
+    return Promise.reject(
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 );
 
-// Response Interceptor
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle errors globally
-    if (error.response && error.response.status === 401) {
-      // Handle unauthorized access
-      const navigate = useNavigate();
+let isRedirecting = false;
 
-      navigate("/login");
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (!isRedirecting && !window.location.pathname.includes("/login")) {
+        isRedirecting = true;
+        localStorage.removeItem("auth");
+        localStorage.removeItem("authToken");
+        window.location.href = "/login";
+      }
     }
-    return Promise.reject(error);
+    return Promise.reject(
+      error instanceof Error ? error : new Error(String(error))
+    );
   }
 );

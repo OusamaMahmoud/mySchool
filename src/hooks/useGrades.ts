@@ -17,7 +17,7 @@ const useGrades = () => {
       setIsLoading(true);
       try {
         const grades = await apiClient.get("/Grades");
-        setGrades(grades.data.$values);
+        setGrades(grades.data);
         console.log(grades.data);
       } catch (error) {
         console.log(error);

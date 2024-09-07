@@ -30,18 +30,10 @@ const Students = () => {
   };
 
   const handleStudentEditing = async (id: number) => {
-    const formData = new FormData();
-
-    if (student) {
-      formData.append("id", id.toString());
-      formData.append("name", student?.name);
-      formData.append("dateOfBirth", student?.dateOfBirth);
-      formData.append("gradeId", student?.gradeId.toString());
-    }
 
     try {
       setIsLoading(true);
-      await apiClient.put(`Students/${id}`, formData, {
+      await apiClient.put(`Students/${id}`, student, {
         headers: {
           "Content-Type": "application/json", // Set the correct content type
         },
@@ -86,8 +78,14 @@ const Students = () => {
           <tr className="bg-[#EAECF0] font-heading">
             <th className="text-left p-2">ID</th>
             <th className="text-left">Student Name</th>
+            <th className="text-left">Parent Name</th>
+            <th className="text-left">Phone Number</th>
+            <th className="text-left">Address</th>
             <th className="text-left  ">Date of birth</th>
-            <th className="text-left  ">Grade Id</th>
+            <th className="text-left  ">Fees</th>
+            <th className="text-left  ">Installments</th>
+            <th className="text-left  ">Amount Per Installment</th>
+            <th className="text-left  ">Grade </th>
             <th className="text-left">Actions</th>
           </tr>
         </thead>
@@ -99,10 +97,20 @@ const Students = () => {
               onClick={() => navigate(`/studentDetails/${stu.id}`)}
             >
               <td className="p-2">{stu?.id}</td>
-              <td className="text-xl font-bold font-heading capitalize">{stu?.name}</td>
-              <td className="">{stu.dateOfBirth}</td>
-              <td className="">{stu.gradeId}</td>
-              <td>
+              <td className="text-lg font-bold font-heading capitalize">
+                {stu?.name}
+              </td>
+              <td className="capitalize">{stu?.parentsName}</td>
+              <td className="">{stu?.phoneNumber}</td>
+              <td className="">{stu?.address}</td>
+              <td className="">{stu?.dateOfBirth}</td>
+              <td className="">{stu?.fee?.totalAmount}</td>
+              <td className="">{stu?.fee?.numberOfInstallments}</td>
+              <td className="">{stu?.fee?.amountPerInstallment}</td>
+              <td className="">
+                {grades?.find((g) => g.id === Number(stu.gradeId))?.gradeName}
+              </td>
+              <td className="flex flex-col gap-2 md:flex-row md:gap-0">
                 <dialog
                   id="my_modal_1"
                   className="modal"
@@ -112,63 +120,141 @@ const Students = () => {
                 >
                   <div className="modal-box">
                     <h3 className="font-bold text-lg">Edit Student Data</h3>
-                    <div className="label">
-                      <p className="label-text">Student Name</p>
-                      <input
-                        type="text"
-                        className="input input-bordered"
-                        onChange={(e) =>
-                          setStudent({
-                            ...student,
-                            name: e.currentTarget.value,
-                          })
-                        }
-                        value={student?.name}
-                      />
-                    </div>
-                    <div className="label">
-                      <p className="label-text">Student Date Of Birth</p>
-                      <input
-                        type="date"
-                        className="input input-bordered"
-                        onChange={(e) => {
-                          const date = e.currentTarget.value; // Capture the date from the input
-                          const now = new Date();
-                          const timePart = now.toTimeString().split(" ")[0]; // Get the current time part
-                          const msPart = now
-                            .getMilliseconds()
-                            .toString()
-                            .padStart(3, "0"); // Get milliseconds and ensure it's 3 digits
+                    <div className="flex flex-wrap items-center max-w-3xl mx-auto  gap-x-8 gap-y-5 mt-8 mb-8">
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Student Name</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.name}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              name: e.currentTarget.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Parent Name</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.parentsName}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              parentsName: e.currentTarget.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Address</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.address}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              address: e.currentTarget.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Phone Number</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.phoneNumber}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              phoneNumber: e.currentTarget.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className=" flex flex-col gap-2">
+                        <h1 className="font-bold">Date Of Birth</h1>
+                        <input
+                          type="date"
+                          className="input input-bordered  min-w-80"
+                          onChange={(e) => {
+                            const date = e.currentTarget.value; // Capture the date from the input
+                            const now = new Date();
+                            const timePart = now.toTimeString().split(" ")[0]; // Get the current time part
+                            const msPart = now
+                              .getMilliseconds()
+                              .toString()
+                              .padStart(3, "0"); // Get milliseconds and ensure it's 3 digits
 
-                          const formattedDate = `${date}T${timePart}.${msPart}`;
+                            const formattedDate = `${date}T${timePart}.${msPart}`;
 
-                          setStudent({
-                            ...student,
-                            dateOfBirth: formattedDate,
-                          });
-                        }}
-                        value={student?.dateOfBirth?.split("T")[0]} // Display only the date part in the
-                      />
-                    </div>
-                    <div className="label">
-                      <p className="label-text">Student Grade</p>
-                      <select
-                        className="select select-bordered"
-                        onChange={(e) =>
-                          setStudent({
-                            ...student,
-                            gradeId: Number(e.currentTarget.value),
-                          })
-                        }
-                        value={student?.gradeId}
-                      >
-                        <option value={""}>Select Student Grade</option>
-                        {grades.map((grade) => (
-                          <option key={grade.id} value={grade?.id}>
-                            {grade.gradeName}
-                          </option>
-                        ))}
-                      </select>
+                            setStudent({
+                              ...student,
+                              dateOfBirth: formattedDate,
+                            });
+                          }}
+                          value={student?.dateOfBirth?.split("T")[0]} // Display only the date part in the
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <h1 className="font-bold ">Student Grade</h1>
+                        <select
+                          className="select select-bordered min-w-80"
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              gradeId: e.currentTarget.value,
+                            })
+                          }
+                          value={student?.gradeId}
+                        >
+                          <option value={""}>Select Student Grade</option>
+                          {grades?.map((grade) => (
+                            <option key={grade.id} value={grade?.id}>
+                              {grade?.gradeName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Total Amount</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.fee?.totalAmount}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              fee: {
+                                ...student.fee,
+                                totalAmount: e.currentTarget.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 ">
+                        <h1 className="font-bold">Number of Installments</h1>
+                        <input
+                          type="text"
+                          className="input input-bordered min-w-80"
+                          value={student?.fee?.numberOfInstallments}
+                          onChange={(e) =>
+                            setStudent({
+                              ...student,
+                              fee: {
+                                ...student.fee,
+                                numberOfInstallments: e.currentTarget.value,
+                              },
+                            })
+                          }
+                        />
+                      </div>
                     </div>
 
                     <button
@@ -179,12 +265,12 @@ const Students = () => {
                         ) as HTMLDialogElement | null;
                         modal?.close();
                       }}
-                      className="btn mr-3"
+                      className="btn btn- mr-3"
                     >
                       Close
                     </button>
                     <button
-                      className={`btn btn-accent  ${
+                      className={`btn px-8 btn-accent  ${
                         isLoading ? "animate-ping" : ""
                       }`}
                       onClick={(e) => {
@@ -204,9 +290,9 @@ const Students = () => {
                     ) as HTMLDialogElement | null;
                     modal?.showModal();
                     setTargetStuId(stu.id);
-                    console.log("hey", stu.id);
+                   
                   }}
-                  className={`btn btn-sm ml-2  ${
+                  className={`btn btn-accent btn-sm px-8 ml-3  ${
                     isLoading ? "animate-ping" : ""
                   } `}
                 >
@@ -217,7 +303,7 @@ const Students = () => {
                     e.stopPropagation();
                     handleStudentDelete(stu.id);
                   }}
-                  className={`btn btn-sm btn-warning ml-2`}
+                  className={`btn btn-sm px-8 btn-warning ml-2`}
                 >
                   {isLoading ? "Deleting..." : "Delete"}
                 </button>

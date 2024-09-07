@@ -8,11 +8,19 @@ import Login from "./components/main/Login";
 import Grades from "./components/main/Grades";
 import { AuthProvider } from "./contexts/AuthContext";
 import AddStudent from "./components/sub/AddStudent";
+import Fees from "./components/main/Fees";
+import TargetFee from "./components/main/TargetFee";
+import Accounts from "./components/main/Accounts";
+import EducationalStages from "./components/main/EducationalStages";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    ),
     children: [
       { path: "dashboard", element: <Dashboard /> },
       {
@@ -24,13 +32,15 @@ const router = createBrowserRouter([
       { path: "/studentDetails/:id", element: <StudentDetails /> },
       { path: "/login", element: <Login /> },
       { path: "/grades", element: <Grades /> },
+      { path: "/fees", element: <Fees /> },
+      { path: "/fees/:id", element: <TargetFee /> },
+      { path: "/accounts", element: <Accounts /> },
+      { path: "/eduStages", element: <EducationalStages /> },
     ],
   },
 ]);
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <RouterProvider router={router} />
   </StrictMode>
 );

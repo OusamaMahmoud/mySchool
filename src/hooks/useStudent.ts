@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../services/api-client";
+import { Student } from "./useStudents";
 
-interface Student {
-  id: number;
-  name: string;
-  dateOfBirth: string;
-  gradeId: number;
-}
 
 const useStudent = ({ id }: { id: number }) => {
   const [student, setStudent] = useState<Student>({} as Student);
