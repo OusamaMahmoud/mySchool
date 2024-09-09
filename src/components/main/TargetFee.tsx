@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
 import { toast, ToastContainer } from "react-toastify";
@@ -10,8 +10,6 @@ export interface Installment {
 const TargetFee = () => {
   const params = useParams();
   const [installments, setInstallments] = useState<Installment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
     const getFeeInstallments = async () => {
@@ -37,7 +35,7 @@ const TargetFee = () => {
         amountPaid: targetInstallments[0].amount,
       };
       try {
-        const res = await apiClient.post(
+       await apiClient.post(
           `/installments/pay?installmentId=${requestedObj.installmentId}&amountPaid=${requestedObj.amountPaid}`,
           {
             headers: {

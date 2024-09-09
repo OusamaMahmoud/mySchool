@@ -1,15 +1,11 @@
-import { CgAdd } from "react-icons/cg";
 import useStudents from "../../hooks/useStudents";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import useGrades from "../../hooks/useGrades";
 
 const Fees = () => {
   const {
     students,
-    setStudents,
     setPageNumber,
-    pageNumber,
-    hasMore,
     sortBy,
     setSortBy,
     sortDirection,
@@ -24,17 +20,17 @@ const Fees = () => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  const handleNextPage = () => {
-    if (hasMore) {
-      setPageNumber(pageNumber + 1); // Load the next page
-    }
-  };
+  // const handleNextPage = () => {
+  //   if (hasMore) {
+  //     setPageNumber(pageNumber + 1); // Load the next page
+  //   }
+  // };
 
-  const handlePreviousPage = () => {
-    if (pageNumber > 1) {
-      setPageNumber(pageNumber - 1); // Go to the previous page
-    }
-  };
+  // const handlePreviousPage = () => {
+  //   if (pageNumber > 1) {
+  //     setPageNumber(pageNumber - 1); // Go to the previous page
+  //   }
+  // };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);

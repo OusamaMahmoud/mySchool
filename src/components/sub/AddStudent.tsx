@@ -8,7 +8,6 @@ import { apiClient } from "../../services/api-client";
 const AddStudent = () => {
   const { grades } = useGrades();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const [studentObject, setStudentObject] = useState({
     name: "",

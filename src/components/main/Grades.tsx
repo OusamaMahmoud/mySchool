@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiClient } from "../../services/api-client";
 import { BiEdit } from "react-icons/bi";
-import { FiDelete } from "react-icons/fi";
-import { LuDelete } from "react-icons/lu";
 import { MdDeleteForever } from "react-icons/md";
-import { Link } from "react-router-dom";
 import { CgAdd } from "react-icons/cg";
 import useEduStages from "../../hooks/useEduStages";
 import { toast } from "react-toastify";
@@ -18,8 +15,8 @@ const Grades = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [targetGrade, setTargetGrade] = useState<Grade>({} as Grade);
   const [targetGradeId, setTargetGradeId] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isLoading,] = useState(false);
+  // const [error, setError] = useState("");
   const [newGrade, setNewGrade] = useState({
     id: "",
     gradeName: "",
@@ -55,7 +52,7 @@ const Grades = () => {
 
   const handleCreateGrade = async () => {
     try {
-      const res = await apiClient.post("/Grades", newGrade, {
+      await apiClient.post("/Grades", newGrade, {
         headers: {
           "Content-Type": "application/json", // Set the correct content type
         },

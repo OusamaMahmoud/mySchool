@@ -1,7 +1,7 @@
 import { CgAdd } from "react-icons/cg";
 import useStudents from "../../hooks/useStudents";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 import { apiClient } from "../../services/api-client";
 import useGrades from "../../hooks/useGrades";
 import useStudent from "../../hooks/useStudent";
@@ -24,7 +24,7 @@ const Students = () => {
   } = useStudents();
   const { grades } = useGrades();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [targetStuId, setTargetStuId] = useState(0);
   const { student, setStudent } = useStudent({ id: targetStuId });
 
@@ -35,12 +35,12 @@ const Students = () => {
     modal?.close();
   };
 
-  const openModal = () => {
-    const modal = document.getElementById(
-      "my_modal_1"
-    ) as HTMLDialogElement | null;
-    modal?.showModal();
-  };
+  // const openModal = () => {
+  //   const modal = document.getElementById(
+  //     "my_modal_1"
+  //   ) as HTMLDialogElement | null;
+  //   modal?.showModal();
+  // };
 
   const handleSortDirectionChange = () => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -95,7 +95,6 @@ const Students = () => {
       setError(error.message);
     }
   };
-  const navigate = useNavigate();
   return (
     <div className="overflow-x-auto mt-10">
       <div className="flex justify-between items-center mb-6">

@@ -1,13 +1,12 @@
 // src/context/AuthContext.tsx
 
-import React, {
+import {
   createContext,
   useState,
   useContext,
   useEffect,
   ReactNode,
 } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   auth: AuthState | null;
