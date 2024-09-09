@@ -11,12 +11,13 @@ import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   auth: AuthState | null;
-  login: (token: string) => void;
+  login: (token: string, payload: any) => void;
   logout: () => void;
 }
 
 interface AuthState {
   token: string;
+  payload?: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,9 +32,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (token: string) => {
+  const login = (token: string, user: any) => {
     localStorage.setItem("authToken", token);
-    setAuth({ token });
+    setAuth({ token, payload: user });
   };
 
   const logout = () => {

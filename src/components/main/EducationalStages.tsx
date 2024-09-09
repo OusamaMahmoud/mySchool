@@ -1,27 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { apiClient } from "../../services/api-client";
+import useEduStages from "../../hooks/useEduStages";
 
-interface EducationalStage {
-  id: string;
-  name: string;
-}
 const EducationalStages = () => {
-  const [educationalStages, setEducationalStages] = useState<
-    EducationalStage[]
-  >([]);
-
-  useEffect(() => {
-    const getEducationalStages = async () => {
-      try {
-        const res = await apiClient.get("/EducationalStages");
-        setEducationalStages(res.data);
-        console.log(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getEducationalStages();
-  }, []);
+  const { educationalStages } = useEduStages();
 
   return (
     <div className="overflow-x-auto mt-10">

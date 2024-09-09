@@ -1,9 +1,13 @@
-import React from 'react'
 
 const Dashboard = () => {
   return (
-    <div>Dashboard</div>
-  )
-}
+    <div>
+      <h1 className="text-xl mt-5">Dashboard</h1>
+      <div className="flex justify-center items-center">
+        <img src={`/images/dashboard/dash.svg`} />
+      </div>
+    </div>
+  );
+};
 
-export default Dashboard
+export default Dashboard;

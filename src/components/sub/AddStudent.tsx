@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useGrades from "../../hooks/useGrades";
 import { apiClient } from "../../services/api-client";
+
 const AddStudent = () => {
   const { grades } = useGrades();
   const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +12,7 @@ const AddStudent = () => {
 
   const [studentObject, setStudentObject] = useState({
     name: "",
-    dateOfBirth: "2024-09-04T07:41:23.157Z",
+    dateOfBirth: "",
     gradeId: "",
     parentsName: "",
     address: "",
@@ -24,7 +25,44 @@ const AddStudent = () => {
 
   const navigate = useNavigate();
 
+  const validateForm = () => {
+    const { name, parentsName, address, phoneNumber, gradeId, fee } =
+      studentObject;
+
+    if (!name || name.length < 3) {
+      toast.error("Student name is required");
+      return false;
+    }
+    if (!parentsName) {
+      toast.error("Parent name is required");
+      return false;
+    }
+    if (!address) {
+      toast.error("Address is required");
+      return false;
+    }
+    if (!phoneNumber) {
+      toast.error("Phone number must be a valid 10-digit number");
+      return false;
+    }
+    if (!gradeId) {
+      toast.error("Grade must be selected");
+      return false;
+    }
+    if (!fee.totalAmount || parseFloat(fee.totalAmount) <= 0) {
+      toast.error("Total amount must be a positive number");
+      return false;
+    }
+    if (!fee.numberOfInstallments || parseInt(fee.numberOfInstallments) <= 0) {
+      toast.error("Number of installments must be a positive number");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleCreateStudent = async () => {
+    if (!validateForm()) return; // Stop if validation fails
 
     try {
       setIsLoading(true);
@@ -34,8 +72,14 @@ const AddStudent = () => {
         },
       });
       setIsLoading(false);
-      toast.success("Great job! Everything went perfectly!", {
-        position: "top-right",
+      toast.success("Good Job, you have successfully Create Student Account.", {
+        position: "top-center", // Change position to top-center
+        style: {
+          fontSize: "20px", // Adjust font size
+          padding: "20px", // Increase padding
+          width: "400px", // Increase width
+          marginTop: "50px", // Add margin to move it lower
+        },
       });
       setTimeout(() => {
         navigate("/students");
@@ -43,8 +87,10 @@ const AddStudent = () => {
     } catch (error) {
       console.log("create student error => ", error);
       setIsLoading(false);
+      toast.error("An error occurred while creating the student");
     }
   };
+
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl mt-10 ml-8">Add New Student</h1>
@@ -111,10 +157,10 @@ const AddStudent = () => {
             type="date"
             className="input input-bordered  min-w-80"
             onChange={(e) => {
-              const date = e.currentTarget.value; // Capture the date from the input
+              const date = e.currentTarget.value;
               const now = new Date();
-              const timePart = now.toTimeString().split(" ")[0]; // Get the current time part
-              const msPart = now.getMilliseconds().toString().padStart(3, "0"); // Get milliseconds and ensure it's 3 digits
+              const timePart = now.toTimeString().split(" ")[0];
+              const msPart = now.getMilliseconds().toString().padStart(3, "0");
 
               const formattedDate = `${date}T${timePart}.${msPart}`;
 
@@ -123,7 +169,7 @@ const AddStudent = () => {
                 dateOfBirth: formattedDate,
               });
             }}
-            value={studentObject?.dateOfBirth?.split("T")[0]} // Display only the date part in the
+            value={studentObject?.dateOfBirth?.split("T")[0]}
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -149,8 +195,9 @@ const AddStudent = () => {
         <div className="flex flex-col gap-2 ">
           <h1 className="font-bold">Total Amount</h1>
           <input
-            type="text"
+            type="number"
             className="input input-bordered min-w-80"
+            min={0}
             onChange={(e) =>
               setStudentObject({
                 ...studentObject,
@@ -165,8 +212,9 @@ const AddStudent = () => {
         <div className="flex flex-col gap-2 ">
           <h1 className="font-bold">Number of Installments</h1>
           <input
-            type="text"
+            type="number"
             className="input input-bordered min-w-80"
+            min={0}
             onChange={(e) =>
               setStudentObject({
                 ...studentObject,
@@ -181,7 +229,9 @@ const AddStudent = () => {
         <div className="flex justify-start items-center w-full mt-2">
           <button
             onClick={handleCreateStudent}
-            className={`btn btn-accent mb-8  ${isLoading ? "animate-pulse" : ""} `}
+            className={`btn btn-accent mb-8  ${
+              isLoading ? "animate-pulse" : ""
+            } `}
           >
             {isLoading ? "Creating..." : "Create"}
           </button>
@@ -192,7 +242,3 @@ const AddStudent = () => {
 };
 
 export default AddStudent;
-
-// "name": "Sandy",
-// "dateOfBirth": "2024-09-04T07:41:23.157Z",
-// "gradeId": 1

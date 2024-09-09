@@ -6,9 +6,22 @@ import { apiClient } from "../../services/api-client";
 import useGrades from "../../hooks/useGrades";
 import useStudent from "../../hooks/useStudent";
 import { toast } from "react-toastify";
+import { FcNext, FcPrevious } from "react-icons/fc";
 
 const Students = () => {
-  const { students, setStudents } = useStudents();
+  const {
+    students,
+    setStudents,
+    setPageNumber,
+    pageNumber,
+    hasMore,
+    sortBy,
+    setSortBy,
+    sortDirection,
+    setSortDirection,
+    searchQuery,
+    setSearchQuery,
+  } = useStudents();
   const { grades } = useGrades();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,8 +42,28 @@ const Students = () => {
     modal?.showModal();
   };
 
-  const handleStudentEditing = async (id: number) => {
+  const handleSortDirectionChange = () => {
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
 
+  const handleNextPage = () => {
+    if (hasMore) {
+      setPageNumber(pageNumber + 1); // Load the next page
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1); // Go to the previous page
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setPageNumber(1); // Reset to the first page when searching
+  };
+
+  const handleStudentEditing = async (id: number) => {
     try {
       setIsLoading(true);
       await apiClient.put(`Students/${id}`, student, {
@@ -65,9 +98,43 @@ const Students = () => {
   const navigate = useNavigate();
   return (
     <div className="overflow-x-auto mt-10">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-10">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="input input-bordered w-full max-w-xs"
+          />
+          <div className="flex items-center gap-6">
+            <label htmlFor="sortBy" className="whitespace-nowrap">
+              Sort By:{" "}
+            </label>
+            <select
+              id="sortBy"
+              className="select select-bordered"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="Name">Student Name</option>
+              <option value="ParentsName">Parent Name</option>
+              <option value="PhoneNumber">Phone Number</option>
+              <option value="DateOfBirth">Date of Birth</option>
+              <option value="TotalAmount">Fees</option>
+            </select>
+
+            {/* Sort Direction Toggle */}
+            <button
+              className="btn bg-[#091F5B] text-white"
+              onClick={handleSortDirectionChange}
+            >
+              {sortDirection === "asc" ? "Ascending" : "Descending"}
+            </button>
+          </div>
+        </div>
         <Link to={"add-new-student"}>
-          <button className="flex gap-1 items-center justify-center btn btn-primary mb-8">
+          <button className="flex gap-1 items-center justify-center btn bg-[#091F5B] text-white ">
             <CgAdd className="text-xl mr-1" />
             Add New Student
           </button>
@@ -82,9 +149,6 @@ const Students = () => {
             <th className="text-left">Phone Number</th>
             <th className="text-left">Address</th>
             <th className="text-left  ">Date of birth</th>
-            <th className="text-left  ">Fees</th>
-            <th className="text-left  ">Installments</th>
-            <th className="text-left  ">Amount Per Installment</th>
             <th className="text-left  ">Grade </th>
             <th className="text-left">Actions</th>
           </tr>
@@ -93,8 +157,7 @@ const Students = () => {
           {students?.map((stu) => (
             <tr
               key={stu?.id}
-              className="hover:bg-gray-100 transition-all duration-200 cursor-pointer"
-              onClick={() => navigate(`/studentDetails/${stu.id}`)}
+              className="hover:bg-gray-100 transition-all duration-200 "
             >
               <td className="p-2">{stu?.id}</td>
               <td className="text-lg font-bold font-heading capitalize">
@@ -103,10 +166,7 @@ const Students = () => {
               <td className="capitalize">{stu?.parentsName}</td>
               <td className="">{stu?.phoneNumber}</td>
               <td className="">{stu?.address}</td>
-              <td className="">{stu?.dateOfBirth}</td>
-              <td className="">{stu?.fee?.totalAmount}</td>
-              <td className="">{stu?.fee?.numberOfInstallments}</td>
-              <td className="">{stu?.fee?.amountPerInstallment}</td>
+              <td className="">{stu?.dateOfBirth.split("T")[0]}</td>
               <td className="">
                 {grades?.find((g) => g.id === Number(stu.gradeId))?.gradeName}
               </td>
@@ -270,7 +330,7 @@ const Students = () => {
                       Close
                     </button>
                     <button
-                      className={`btn px-8 btn-accent  ${
+                      className={`btn px-8 bg-[#091F5B] text-white  ${
                         isLoading ? "animate-ping" : ""
                       }`}
                       onClick={(e) => {
@@ -282,6 +342,40 @@ const Students = () => {
                     </button>
                   </div>
                 </dialog>
+                <dialog
+                  id="my_modal_3"
+                  className="modal"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <div className="modal-box">
+                    <h3 className="font-bold text-lg mb-4">Are You Sure ?</h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const modal = document.getElementById(
+                          "my_modal_3"
+                        ) as HTMLDialogElement | null;
+                        modal?.close();
+                      }}
+                      className="btn btn- mr-3"
+                    >
+                      Close
+                    </button>
+                    <button
+                      className={`btn px-8 btn-warning text-white  ${
+                        isLoading ? "animate-ping" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStudentDelete(stu.id);
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </dialog>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -290,28 +384,47 @@ const Students = () => {
                     ) as HTMLDialogElement | null;
                     modal?.showModal();
                     setTargetStuId(stu.id);
-                   
                   }}
-                  className={`btn btn-accent btn-sm px-8 ml-3  ${
-                    isLoading ? "animate-ping" : ""
-                  } `}
+                  className={`btn bg-[#091F5B] text-white btn-sm px-8 ml-3 `}
                 >
                   Edit
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleStudentDelete(stu.id);
+                    const modal = document.getElementById(
+                      "my_modal_3"
+                    ) as HTMLDialogElement | null;
+                    modal?.showModal();
+                    setTargetStuId(stu.id);
                   }}
                   className={`btn btn-sm px-8 btn-warning ml-2`}
                 >
-                  {isLoading ? "Deleting..." : "Delete"}
+                  Delete
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end gap-6 mt-4 mb-6 ">
+        <button
+          className="btn btn-accent text-white"
+          onClick={handlePreviousPage}
+          disabled={pageNumber === 1}
+        >
+          <FcPrevious />
+          {isLoading && pageNumber === 1 ? "Loading..." : "Previous Page"}
+        </button>
+
+        <button
+          className="btn btn-accent text-white"
+          onClick={handleNextPage}
+          disabled={!hasMore}
+        >
+          {isLoading ? "Loading..." : "Next Page"} <FcNext />
+        </button>
+      </div>
     </div>
   );
 };
