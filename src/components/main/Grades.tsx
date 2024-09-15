@@ -6,7 +6,7 @@ import { CgAdd } from "react-icons/cg";
 import useEduStages from "../../hooks/useEduStages";
 import { toast } from "react-toastify";
 
-interface Grade {
+export interface Grade {
   id: string;
   gradeName: string;
   educationalStageId: string;
@@ -15,7 +15,7 @@ const Grades = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [targetGrade, setTargetGrade] = useState<Grade>({} as Grade);
   const [targetGradeId, setTargetGradeId] = useState("");
-  const [isLoading,] = useState(false);
+  const [isLoading] = useState(false);
   // const [error, setError] = useState("");
   const [newGrade, setNewGrade] = useState({
     id: "",
@@ -23,9 +23,10 @@ const Grades = () => {
     educationalStageId: "",
   });
 
-  const { educationalStages } = useEduStages();
+  const { educationalStages, setEducationalStages } = useEduStages();
+
+  // Get A Specific Grade.
   useEffect(() => {
-    console.log(targetGradeId);
     const getGrade = async () => {
       try {
         const targetGrade = await apiClient.get(`Grades/${targetGradeId}`);
@@ -37,6 +38,7 @@ const Grades = () => {
     getGrade();
   }, [targetGradeId]);
 
+  // Get Grades
   useEffect(() => {
     const getGrades = async () => {
       try {
@@ -50,6 +52,7 @@ const Grades = () => {
     getGrades();
   }, []);
 
+  // Create A Grade
   const handleCreateGrade = async () => {
     try {
       await apiClient.post("/Grades", newGrade, {
@@ -67,29 +70,18 @@ const Grades = () => {
     }
   };
 
+  // Edit A Grade
   const handleGradeEditing = async () => {
     try {
-      const res = await apiClient.put(
-        `/Grades/${targetGradeId}`,
-        { ...newGrade, id: targetGradeId },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await apiClient.put(`/Grades/${targetGradeId}`, targetGrade, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (res.status === 204) {
-        setGrades((prev) =>
-          prev.map((g) =>
-            g.id === targetGradeId
-              ? {
-                  ...g,
-                  gradeName: newGrade.gradeName,
-                  educationalStageId: newGrade.educationalStageId,
-                }
-              : g
-          )
-        );
+        // Refetch all grades
+        const updatedGrades = await apiClient.get("/Grades");
+        setGrades(updatedGrades.data);
       }
       toast.success("Successfully Update the Grade.");
       const modal = document.getElementById(
@@ -100,6 +92,7 @@ const Grades = () => {
       console.log("Grade errors =>", error);
     }
   };
+  // Delete A Grade
   const handleGradeDeleting = async () => {
     try {
       await apiClient.delete(`/Grades/${targetGradeId}`);
@@ -113,18 +106,15 @@ const Grades = () => {
       console.log(error);
     }
   };
+
   return (
     <div className="overflow-x-auto mt-10">
       {/* Add New Grade */}
-      <dialog
-        id="my_modal_1"
-        className="modal"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+      <dialog id="my_modal_1" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Add New Grade</h3>
+          <h3 className="font-bold text-lg bg-[#091F5B] text-white">
+            Add New Grade
+          </h3>
           <div className="flex flex-wrap items-center max-w-3xl mx-auto  gap-x-8 gap-y-5 mt-8 mb-8">
             <div className="flex flex-col gap-2 ">
               <h1 className="font-bold">Grade Name</h1>
@@ -153,7 +143,9 @@ const Grades = () => {
                 className="select select-bordered min-w-80"
               >
                 {educationalStages.map((edu) => (
-                  <option value={edu.id}>{edu.name}</option>
+                  <option value={edu.id} key={edu.id}>
+                    {edu.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -202,12 +194,12 @@ const Grades = () => {
                 type="text"
                 className="input input-bordered min-w-80"
                 onChange={(e) =>
-                  setNewGrade({
-                    ...newGrade,
+                  setTargetGrade({
+                    ...targetGrade,
                     gradeName: e.currentTarget.value,
                   })
                 }
-                defaultValue={targetGrade.gradeName}
+                value={targetGrade.gradeName}
               />
             </div>
           </div>
@@ -216,19 +208,16 @@ const Grades = () => {
               <h1 className="font-bold">Educational Stage</h1>
               <select
                 onChange={(e) =>
-                  setNewGrade({
-                    ...newGrade,
+                  setTargetGrade({
+                    ...targetGrade,
                     educationalStageId: e.currentTarget.value,
                   })
                 }
+                value={targetGrade.educationalStageId}
                 className="select select-bordered min-w-80"
               >
                 {educationalStages.map((edu) => (
-                  <option
-                    value={edu.id}
-                    key={edu.id}
-                    defaultValue={targetGrade.educationalStageId}
-                  >
+                  <option value={edu.id} key={edu.id}>
                     {edu.name}
                   </option>
                 ))}
@@ -276,7 +265,7 @@ const Grades = () => {
             onClick={(e) => {
               e.stopPropagation();
               const modal = document.getElementById(
-                "my_modal_2"
+                "my_modal_3"
               ) as HTMLDialogElement | null;
               modal?.close();
             }}
@@ -305,7 +294,7 @@ const Grades = () => {
             ) as HTMLDialogElement | null;
             modal?.showModal();
           }}
-          className="flex gap-1 items-center justify-center btn btn-primary mb-8"
+          className="flex gap-1 items-center justify-center btn bg-[#091F5B] text-white mb-8"
         >
           <CgAdd className="text-xl mr-1" />
           Add New Grade
@@ -336,6 +325,7 @@ const Grades = () => {
                   )?.name
                 }
               </td>
+
               <td className="flex text-lg font-bold font-heading capitalize">
                 <BiEdit
                   onClick={(e) => {
@@ -348,6 +338,7 @@ const Grades = () => {
                   }}
                   className="mr-5 text-2xl hover:text-yellow-300 border "
                 />
+
                 <MdDeleteForever
                   onClick={(e) => {
                     e.stopPropagation();

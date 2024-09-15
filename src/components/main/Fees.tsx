@@ -1,6 +1,8 @@
 import useStudents from "../../hooks/useStudents";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useGrades from "../../hooks/useGrades";
+import { FcNext, FcPrevious } from "react-icons/fc";
+import { useState } from "react";
 
 const Fees = () => {
   const {
@@ -12,6 +14,8 @@ const Fees = () => {
     setSortDirection,
     searchQuery,
     setSearchQuery,
+    hasMore,
+    pageNumber,
   } = useStudents();
   const { grades } = useGrades();
   const navigate = useNavigate();
@@ -20,17 +24,17 @@ const Fees = () => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  // const handleNextPage = () => {
-  //   if (hasMore) {
-  //     setPageNumber(pageNumber + 1); // Load the next page
-  //   }
-  // };
+  const handleNextPage = () => {
+    if (hasMore) {
+      setPageNumber(pageNumber + 1); // Load the next page
+    }
+  };
 
-  // const handlePreviousPage = () => {
-  //   if (pageNumber > 1) {
-  //     setPageNumber(pageNumber - 1); // Go to the previous page
-  //   }
-  // };
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1); // Go to the previous page
+    }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -84,14 +88,13 @@ const Fees = () => {
             <th className="text-left  ">Fees</th>
             <th className="text-left  ">Installments</th>
             <th className="text-left  ">Amount Per Installment</th>
+            <th className="text-left  ">Action</th>
           </tr>
         </thead>
         <tbody>
           {students?.map((stu) => (
             <tr
               key={stu?.id}
-              className="hover:bg-gray-100 transition-all duration-200 cursor-pointer"
-              onClick={() => navigate(`/fees/${stu.fee.id}`)}
             >
               <td className="p-2">{stu?.fee?.id}</td>
               <td className="text-lg font-bold font-heading capitalize">
@@ -103,10 +106,35 @@ const Fees = () => {
               <td className="">{stu?.fee?.totalAmount}</td>
               <td className="">{stu?.fee?.numberOfInstallments}</td>
               <td className="">{stu?.fee?.amountPerInstallment}</td>
+
+              <td
+                onClick={() => navigate(`/fees/${stu.fee.id}`)}
+                className="btn hover:bg-[#1a2f6c] bg-[#091F5B]  text-white my-1"
+              >
+                Pay
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end gap-6 mt-4 mb-6 ">
+        <button
+          className="btn btn-accent text-white"
+          onClick={handlePreviousPage}
+          disabled={pageNumber === 1}
+        >
+          <FcPrevious />
+          Previous Page
+        </button>
+
+        <button
+          className="btn btn-accent text-white"
+          onClick={handleNextPage}
+          disabled={!hasMore}
+        >
+          Next Page <FcNext />
+        </button>
+      </div>
     </div>
   );
 };

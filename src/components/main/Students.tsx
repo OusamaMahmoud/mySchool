@@ -63,10 +63,10 @@ const Students = () => {
     setPageNumber(1); // Reset to the first page when searching
   };
 
-  const handleStudentEditing = async (id: number) => {
+  const handleStudentEditing = async () => {
     try {
       setIsLoading(true);
-      await apiClient.put(`Students/${id}`, student, {
+      await apiClient.put(`Students/${targetStuId}`, student, {
         headers: {
           "Content-Type": "application/json", // Set the correct content type
         },
@@ -334,7 +334,7 @@ const Students = () => {
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStudentEditing(stu.id);
+                        handleStudentEditing();
                       }}
                     >
                       Edit

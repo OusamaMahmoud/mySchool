@@ -65,10 +65,10 @@ const Login = () => {
     }
   };
   return (
-    <div className="flex items-center gap-8 p-8">
+    <div className="flex items-center gap-8 p-8 my-10 ">
       <ToastContainer />
-      <div>
-        <img src="/images/login/login.svg" />
+      <div className="w-[500px] rounded-md">
+        <img src="/images/login/login.svg" alt="login" className="object-cover rounded-md" />
       </div>
       <div className="flex flex-col mx-auto ">
         <h1 className="text-3xl font-bold mt-4">Log in</h1>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../services/api-client";
 
-interface EducationalStage {
+export interface EducationalStage {
   id: string;
   name: string;
 }

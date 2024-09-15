@@ -1,8 +1,5 @@
 import { BiLogOut, BiMoneyWithdraw } from "react-icons/bi";
-import {
-  MdDashboard,
-  MdManageAccounts,
-} from "react-icons/md";
+import { MdDashboard, MdManageAccounts } from "react-icons/md";
 import { PiStudent } from "react-icons/pi";
 import { NavLink, useNavigate } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
@@ -21,8 +18,14 @@ const Sidebar = () => {
       navigate("login");
       localStorage.removeItem("authToken");
     } catch (error) {
-      console.log("Logout => ",error);
+      console.log("Logout => ", error);
     }
+  };
+  const openModel = () => {
+    const modal = document.getElementById(
+      "my_modal_5"
+    ) as HTMLDialogElement | null;
+    modal?.showModal();
   };
   const sidebarElements = [
     {
@@ -72,6 +75,29 @@ const Sidebar = () => {
   return (
     <div className="min-h-screen bg-[#091F5B] w-[300px] shadow-2xl rounded-md p-4 pl-1">
       <ToastContainer />
+      <dialog id="my_modal_5" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg mb-4">Are You Sure to logout?</h3>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const modal = document.getElementById(
+                "my_modal_5"
+              ) as HTMLDialogElement | null;
+              modal?.close();
+            }}
+            className="btn btn- mr-3"
+          >
+            Close
+          </button>
+          <button
+            className={`btn px-8 btn-warning text-white`}
+            onClick={handleLogOut}
+          >
+            Logout
+          </button>
+        </div>
+      </dialog>
       <div className="flex justify-center items-center w-[60px] mx-auto">
         <img
           src="/images/sidebar/logo.svg"
@@ -82,9 +108,14 @@ const Sidebar = () => {
         {sidebarElements.map((item) => {
           if (item.label === "Log Out") {
             return (
-              <li key={item.id} className={`${normal}`} onClick={handleLogOut}>
+              <button
+                key={item.id}
+                className={normal}
+                onClick={openModel}
+                tabIndex={0}
+              >
                 {item.icon} {item.label}
-              </li>
+              </button>
             );
           } else {
             return (
