@@ -23,7 +23,7 @@ const Grades = () => {
     educationalStageId: "",
   });
 
-  const { educationalStages, setEducationalStages } = useEduStages();
+  const { educationalStages,  } = useEduStages();
 
   // Get A Specific Grade.
   useEffect(() => {

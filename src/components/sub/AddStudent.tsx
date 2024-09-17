@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useGrades from "../../hooks/useGrades";
 import { apiClient } from "../../services/api-client";
+import PhoneNumberInput from "./PhoneNumberInput";
 
 const AddStudent = () => {
   const { grades } = useGrades();
@@ -25,7 +26,7 @@ const AddStudent = () => {
   const navigate = useNavigate();
 
   const validateForm = () => {
-    const { name, parentsName, address, phoneNumber, gradeId, fee } =
+    const { name, parentsName, address, gradeId, fee } =
       studentObject;
 
     if (!name || name.length < 3) {
@@ -40,8 +41,8 @@ const AddStudent = () => {
       toast.error("Address is required");
       return false;
     }
-    if (!phoneNumber) {
-      toast.error("Phone number must be a valid 10-digit number");
+    if (!isValid) {
+      toast.error("Provide a Valid Phone Number!");
       return false;
     }
     if (!gradeId) {
@@ -90,6 +91,17 @@ const AddStudent = () => {
     }
   };
 
+  const [isValid, setIsValid] = useState<boolean>(false);
+
+  const handlePhoneNumberChange = (value: string) => {
+    setStudentObject({ ...studentObject, phoneNumber: value });
+  };
+
+  const handleValidityChange = (valid: boolean) => {
+    setIsValid(valid);
+  };
+
+
   return (
     <div className="flex flex-col">
       <h1 className="text-3xl mt-10 ml-8">Add New Student</h1>
@@ -137,18 +149,16 @@ const AddStudent = () => {
             }
           />
         </div>
-        <div className="flex flex-col gap-2 ">
+        <div className="flex flex-col gap-2">
           <h1 className="font-bold">Phone Number</h1>
-          <input
-            type="text"
-            className="input input-bordered min-w-80"
-            onChange={(e) =>
-              setStudentObject({
-                ...studentObject,
-                phoneNumber: e.currentTarget.value,
-              })
-            }
+          <PhoneNumberInput
+            value={studentObject.phoneNumber}
+            onChange={handlePhoneNumberChange}
+            onValid={handleValidityChange}
           />
+          <p className="text-red-400">
+            {isValid ? "" : "Phone number is not valid."}
+          </p>
         </div>
         <div className=" flex flex-col gap-2">
           <h1 className="font-bold">Date Of Birth</h1>

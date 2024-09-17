@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   auth: AuthState | null;
@@ -23,11 +24,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuth] = useState<AuthState | null>(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
       setAuth({ token });
+    } else {
+      navigate("/login");
     }
   }, []);
 

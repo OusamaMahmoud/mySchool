@@ -2,7 +2,6 @@ import useStudents from "../../hooks/useStudents";
 import { useNavigate } from "react-router-dom";
 import useGrades from "../../hooks/useGrades";
 import { FcNext, FcPrevious } from "react-icons/fc";
-import { useState } from "react";
 
 const Fees = () => {
   const {
@@ -17,6 +16,7 @@ const Fees = () => {
     hasMore,
     pageNumber,
   } = useStudents();
+  
   const { grades } = useGrades();
   const navigate = useNavigate();
 
