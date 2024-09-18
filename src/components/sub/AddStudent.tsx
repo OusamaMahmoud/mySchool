@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import useGrades from "../../hooks/useGrades";
 import { apiClient } from "../../services/api-client";
 import PhoneNumberInput from "./PhoneNumberInput";
+import useEduStages from "../../hooks/useEduStages";
 
 const AddStudent = () => {
   const { grades } = useGrades();
@@ -26,8 +27,7 @@ const AddStudent = () => {
   const navigate = useNavigate();
 
   const validateForm = () => {
-    const { name, parentsName, address, gradeId, fee } =
-      studentObject;
+    const { name, parentsName, address, gradeId, fee } = studentObject;
 
     if (!name || name.length < 3) {
       toast.error("Student name is required");
@@ -100,7 +100,9 @@ const AddStudent = () => {
   const handleValidityChange = (valid: boolean) => {
     setIsValid(valid);
   };
-
+  const { educationalStages } = useEduStages();
+  const [selectedEducationalStageId, setSelectedEducationalStageId] =
+    useState("");
 
   return (
     <div className="flex flex-col">
@@ -156,9 +158,11 @@ const AddStudent = () => {
             onChange={handlePhoneNumberChange}
             onValid={handleValidityChange}
           />
-          <p className="text-red-400">
-            {isValid ? "" : "Phone number is not valid."}
-          </p>
+          {studentObject.phoneNumber && (
+            <p className="text-red-400">
+              {isValid ? "" : "Phone number is not valid."}
+            </p>
+          )}
         </div>
         <div className=" flex flex-col gap-2">
           <h1 className="font-bold">Date Of Birth</h1>
@@ -182,6 +186,22 @@ const AddStudent = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
+          <h1 className="font-bold">Educational Stage</h1>
+          <select
+            onChange={(e) =>
+              setSelectedEducationalStageId(e.currentTarget.value)
+            }
+            className="select select-bordered min-w-80"
+          >
+            <option value={""}>Select Educational Stage</option>
+            {educationalStages.map((edu) => (
+              <option value={edu.id} key={edu.id}>
+                {edu.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-2">
           <h1 className="font-bold ">Student Grade</h1>
           <select
             className="select select-bordered min-w-80"
@@ -192,13 +212,19 @@ const AddStudent = () => {
               })
             }
             value={studentObject?.gradeId}
+            disabled={!selectedEducationalStageId}
           >
             <option value={""}>Select Student Grade</option>
-            {grades?.map((grade) => (
-              <option key={grade.id} value={grade?.id}>
-                {grade?.gradeName}
-              </option>
-            ))}
+            {grades
+              ?.filter(
+                (g) =>
+                  g.educationalStageId.toString() === selectedEducationalStageId
+              )
+              .map((grade) => (
+                <option key={grade.id} value={grade?.id}>
+                  {grade?.gradeName}
+                </option>
+              ))}
           </select>
         </div>
         <div className="flex flex-col gap-2 ">

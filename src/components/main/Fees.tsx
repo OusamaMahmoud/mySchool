@@ -1,8 +1,17 @@
-import useStudents from "../../hooks/useStudents";
+import useStudents, { Student } from "../../hooks/useStudents";
 import { useNavigate } from "react-router-dom";
 import useGrades from "../../hooks/useGrades";
 import { FcNext, FcPrevious } from "react-icons/fc";
-
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { UserOptions } from "jspdf-autotable";
+// Add this type declaration
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 const Fees = () => {
   const {
     students,
@@ -16,7 +25,7 @@ const Fees = () => {
     hasMore,
     pageNumber,
   } = useStudents();
-  
+
   const { grades } = useGrades();
   const navigate = useNavigate();
 
@@ -40,10 +49,65 @@ const Fees = () => {
     setSearchQuery(e.target.value);
     setPageNumber(1); // Reset to the first page when searching
   };
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Fees List", 20, 10);
+
+    const tableColumn = [
+      "Student Name",
+      "Total Amount",
+      "No Of Installments",
+      "Amount Per Installment",
+      "Grade",
+    ];
+    const tableRows = students.map((student: Student) => [
+      student.name,
+      student?.fee?.totalAmount,
+      student?.fee?.numberOfInstallments,
+      student?.fee?.amountPerInstallment,
+      grades?.find((g) => g.id === Number(student.gradeId))?.gradeName || "",
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+    doc.save("fees_list.pdf");
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      students.map((student: Student) => ({
+        "Student Name": student.name,
+        "Total Amount": student.phoneNumber,
+        "No Of Installments": student.address,
+        "Amount Per Installment": student.dateOfBirth.split("T")[0],
+        Grade:
+          grades?.find((g) => g.id === Number(student.gradeId))?.gradeName ||
+          "",
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Fees");
+    XLSX.writeFile(workbook, "fees_list.xlsx");
+  };
 
   return (
     <div className="overflow-x-auto mt-10">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col mb-6">
+        <div className="flex gap-4 mb-4">
+          <button onClick={exportToPDF} className="btn bg-[#091F5B] text-white">
+            Export to PDF
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="btn bg-[#091F5B] text-white"
+          >
+            Export to Excel
+          </button>
+        </div>
         <div className="flex items-center gap-10">
           <input
             type="text"
@@ -82,7 +146,6 @@ const Fees = () => {
       <table className="table w-full">
         <thead>
           <tr className="bg-[#EAECF0] font-heading">
-            <th className="text-left p-2">ID</th>
             <th className="text-left">Student Name</th>
             <th className="text-left  ">Grade</th>
             <th className="text-left  ">Fees</th>
@@ -93,10 +156,7 @@ const Fees = () => {
         </thead>
         <tbody>
           {students?.map((stu) => (
-            <tr
-              key={stu?.id}
-            >
-              <td className="p-2">{stu?.fee?.id}</td>
+            <tr key={stu?.id}>
               <td className="text-lg font-bold font-heading capitalize">
                 {stu?.name}
               </td>
@@ -106,7 +166,6 @@ const Fees = () => {
               <td className="">{stu?.fee?.totalAmount}</td>
               <td className="">{stu?.fee?.numberOfInstallments}</td>
               <td className="">{stu?.fee?.amountPerInstallment}</td>
-
               <td
                 onClick={() => navigate(`/fees/${stu.fee.id}`)}
                 className="btn hover:bg-[#1a2f6c] bg-[#091F5B]  text-white my-1"

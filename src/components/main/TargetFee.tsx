@@ -67,7 +67,7 @@ const TargetFee = () => {
         <div className="ml-6 flex gap-4 ">
           <img src="/images/student/profile.svg" />
           <div className="mt-10">
-            <h1 className="font-bold text-xl text-white ">{}</h1>
+            <h1 className="font-bold text-xl text-white "></h1>
           </div>
         </div>
         <div className="flex justify-end h-36">

@@ -5,8 +5,18 @@ import { useEffect, useState } from "react";
 import { CgAdd } from "react-icons/cg";
 import { BiEdit } from "react-icons/bi";
 import { MdDeleteForever } from "react-icons/md";
-
+import { UserOptions } from "jspdf-autotable";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+// Add this type declaration
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 const EducationalStages = () => {
+  
   const [targetEducationalStage, setEducationalStage] =
     useState<EducationalStage>({} as EducationalStage);
   const [targetEducationalStageId, setTargetEducationalStageId] = useState("");
@@ -17,6 +27,36 @@ const EducationalStages = () => {
   });
 
   const { educationalStages, setEducationalStages } = useEduStages();
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Educational Stages List", 20, 10);
+
+    const tableColumn = ["Educational Stage Name"];
+    const tableRows = educationalStages.map((edu) => [
+      edu.name
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+    doc.save("educational_stages_list.pdf");
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      educationalStages.map((edu) => ({
+        "Educational Stage Name": edu.name,
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Educational_Stages");
+    XLSX.writeFile(workbook, "educational_stages_list.xlsx");
+  };
+
 
   // Get A Specific Grade.
   useEffect(() => {
@@ -46,6 +86,16 @@ const EducationalStages = () => {
         "my_modal_1"
       ) as HTMLDialogElement | null;
       modal?.close();
+      const getEducationalStages = async () => {
+        try {
+          const res = await apiClient.get("/EducationalStages");
+          setEducationalStages(res.data);
+          console.log(res.data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      getEducationalStages();
     } catch (error) {
       console.log(error);
     }
@@ -234,7 +284,7 @@ const EducationalStages = () => {
         </div>
       </dialog>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -248,11 +298,21 @@ const EducationalStages = () => {
           <CgAdd className="text-xl mr-1" />
           Add New Educational Stage
         </button>
+        <div className="flex gap-4 mb-4">
+          <button onClick={exportToPDF} className="btn bg-[#091F5B] text-white">
+            Export to PDF
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="btn bg-[#091F5B] text-white"
+          >
+            Export to Excel
+          </button>
+        </div>
       </div>
       <table className="table w-full">
         <thead>
           <tr className="bg-[#EAECF0] font-heading">
-            <th className="text-left">Id</th>
             <th className="text-left">Educational Stage</th>
             <th className="text-left">Actions</th>
           </tr>
@@ -263,9 +323,6 @@ const EducationalStages = () => {
               key={idx}
               className="hover:bg-gray-100 transition-all duration-200 cursor-pointer"
             >
-              <td className="text-lg font-bold font-heading capitalize">
-                {edu?.id}
-              </td>
               <td className="text-lg font-bold font-heading capitalize">
                 {edu?.name}
               </td>

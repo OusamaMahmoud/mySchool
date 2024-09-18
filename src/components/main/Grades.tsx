@@ -5,7 +5,17 @@ import { MdDeleteForever } from "react-icons/md";
 import { CgAdd } from "react-icons/cg";
 import useEduStages from "../../hooks/useEduStages";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { UserOptions } from "jspdf-autotable";
 
+// Add this type declaration
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 export interface Grade {
   id: string;
   gradeName: string;
@@ -18,12 +28,11 @@ const Grades = () => {
   const [isLoading] = useState(false);
   // const [error, setError] = useState("");
   const [newGrade, setNewGrade] = useState({
-    id: "",
     gradeName: "",
     educationalStageId: "",
   });
 
-  const { educationalStages,  } = useEduStages();
+  const { educationalStages } = useEduStages();
 
   // Get A Specific Grade.
   useEffect(() => {
@@ -65,8 +74,18 @@ const Grades = () => {
         "my_modal_1"
       ) as HTMLDialogElement | null;
       modal?.close();
+      const getGrades = async () => {
+        try {
+          const res = await apiClient.get("/Grades");
+          setGrades(res.data);
+          console.log(res.data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      getGrades();
     } catch (error) {
-      console.log(error);
+      console.log("create grade =>", error);
     }
   };
 
@@ -107,6 +126,41 @@ const Grades = () => {
     }
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Grades List", 20, 10);
+
+    const tableColumn = ["Grade Name", "Educational Stage"];
+    const tableRows = grades.map((grad) => [
+      grad.gradeName,
+      educationalStages?.find(
+        (edu) => grad?.educationalStageId === edu?.id
+      )?.name || 'N/A',
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+    doc.save("grades_list.pdf");
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      grades.map((grad) => ({
+        "Grade Name": grad.gradeName,
+        "Educational Stage": educationalStages.find(
+          (edu) => grad?.educationalStageId === edu.id
+        )?.name,
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Grades");
+    XLSX.writeFile(workbook, "Grades_list.xlsx");
+  };
+
   return (
     <div className="overflow-x-auto mt-10">
       {/* Add New Grade */}
@@ -115,6 +169,7 @@ const Grades = () => {
           <h3 className="font-bold text-lg bg-[#091F5B] text-white">
             Add New Grade
           </h3>
+
           <div className="flex flex-wrap items-center max-w-3xl mx-auto  gap-x-8 gap-y-5 mt-8 mb-8">
             <div className="flex flex-col gap-2 ">
               <h1 className="font-bold">Grade Name</h1>
@@ -142,6 +197,7 @@ const Grades = () => {
                 }
                 className="select select-bordered min-w-80"
               >
+                <option value={""}>Selected Educational Stage</option>
                 {educationalStages.map((edu) => (
                   <option value={edu.id} key={edu.id}>
                     {edu.name}
@@ -285,7 +341,7 @@ const Grades = () => {
         </div>
       </dialog>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -299,6 +355,17 @@ const Grades = () => {
           <CgAdd className="text-xl mr-1" />
           Add New Grade
         </button>
+        <div className="flex gap-4 mb-4">
+          <button onClick={exportToPDF} className="btn bg-[#091F5B] text-white">
+            Export to PDF
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="btn bg-[#091F5B] text-white"
+          >
+            Export to Excel
+          </button>
+        </div>
       </div>
 
       <table className="table w-full">

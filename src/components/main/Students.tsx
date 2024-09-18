@@ -1,5 +1,5 @@
 import { CgAdd } from "react-icons/cg";
-import useStudents from "../../hooks/useStudents";
+import useStudents, { Student } from "../../hooks/useStudents";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { apiClient } from "../../services/api-client";
@@ -7,6 +7,17 @@ import useGrades from "../../hooks/useGrades";
 import useStudent from "../../hooks/useStudent";
 import { toast } from "react-toastify";
 import { FcNext, FcPrevious } from "react-icons/fc";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { UserOptions } from "jspdf-autotable";
+
+// Add this type declaration
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 
 const Students = () => {
   const {
@@ -71,6 +82,9 @@ const Students = () => {
           "Content-Type": "application/json", // Set the correct content type
         },
       });
+      setStudents((prev) =>
+        prev.map((stu) => (stu.id === student.id ? student : stu))
+      );
       setIsLoading(false);
       closeModal();
     } catch (error: any) {
@@ -95,9 +109,74 @@ const Students = () => {
       setError(error.message);
     }
   };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Students List", 20, 10);
+
+    const tableColumn = [
+      "Name",
+      "Parent Name",
+      "Phone Number",
+      "Address",
+      "Date of Birth",
+      "Grade",
+    ];
+    const tableRows = students.map((student: Student) => [
+      student.name,
+      student.parentsName,
+      student.phoneNumber,
+      student.address,
+      student.dateOfBirth.split("T")[0],
+      grades?.find((g) => g.id === Number(student.gradeId))?.gradeName || "",
+    ]);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+    });
+    doc.save("students_list.pdf");
+  };
+
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(
+      students.map((student: Student) => ({
+        "Student Name": student.name,
+        "Parent Name": student.parentsName,
+        "Phone Number": student.phoneNumber,
+        Address: student.address,
+        "Date of Birth": student.dateOfBirth.split("T")[0],
+        Grade:
+          grades?.find((g) => g.id === Number(student.gradeId))?.gradeName ||
+          "",
+      }))
+    );
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+    XLSX.writeFile(workbook, "students_list.xlsx");
+  };
   return (
     <div className="overflow-x-auto mt-10">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 justify-between  mb-6">
+        <div className="flex justify-end gap-2 mb-3">
+          <Link to={"add-new-student"}>
+            <button className="flex gap-1 items-center justify-center btn bg-[#091F5B] text-white ">
+              <CgAdd className="text-xl mr-1" />
+              Add New Student
+            </button>
+          </Link>
+          <button onClick={exportToPDF} className="btn bg-[#091F5B] text-white">
+            Export to PDF
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="btn bg-[#091F5B] text-white"
+          >
+            Export to Excel
+          </button>
+        </div>
         <div className="flex items-center gap-10">
           <input
             type="text"
@@ -132,17 +211,10 @@ const Students = () => {
             </button>
           </div>
         </div>
-        <Link to={"add-new-student"}>
-          <button className="flex gap-1 items-center justify-center btn bg-[#091F5B] text-white ">
-            <CgAdd className="text-xl mr-1" />
-            Add New Student
-          </button>
-        </Link>
       </div>
       <table className="table w-full">
         <thead>
           <tr className="bg-[#EAECF0] font-heading">
-            <th className="text-left p-2">ID</th>
             <th className="text-left">Student Name</th>
             <th className="text-left">Parent Name</th>
             <th className="text-left">Phone Number</th>
@@ -158,7 +230,6 @@ const Students = () => {
               key={stu?.id}
               className="hover:bg-gray-100 transition-all duration-200 "
             >
-              <td className="p-2">{stu?.id}</td>
               <td className="text-lg font-bold font-heading capitalize">
                 {stu?.name}
               </td>
