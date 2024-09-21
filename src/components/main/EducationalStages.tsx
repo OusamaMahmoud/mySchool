@@ -16,7 +16,6 @@ declare module "jspdf" {
   }
 }
 const EducationalStages = () => {
-  
   const [targetEducationalStage, setEducationalStage] =
     useState<EducationalStage>({} as EducationalStage);
   const [targetEducationalStageId, setTargetEducationalStageId] = useState("");
@@ -26,16 +25,15 @@ const EducationalStages = () => {
     name: "",
   });
 
-  const { educationalStages, setEducationalStages } = useEduStages();
+  const { educationalStages, setEducationalStages, setSearchQuery } =
+    useEduStages();
 
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Educational Stages List", 20, 10);
 
     const tableColumn = ["Educational Stage Name"];
-    const tableRows = educationalStages.map((edu) => [
-      edu.name
-    ]);
+    const tableRows = educationalStages.map((edu) => [edu.name]);
 
     doc.autoTable({
       head: [tableColumn],
@@ -56,7 +54,6 @@ const EducationalStages = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Educational_Stages");
     XLSX.writeFile(workbook, "educational_stages_list.xlsx");
   };
-
 
   // Get A Specific Grade.
   useEffect(() => {
@@ -283,7 +280,13 @@ const EducationalStages = () => {
           </button>
         </div>
       </dialog>
-
+      <div>
+        <input
+          className="input input-bordered"
+          placeholder="Searching..."
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+        />
+      </div>
       <div className="flex justify-end gap-4">
         <button
           onClick={(e) => {

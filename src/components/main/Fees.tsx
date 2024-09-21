@@ -126,11 +126,8 @@ const Fees = () => {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
+              <option value="">Select Sort </option>
               <option value="Name">Student Name</option>
-              <option value="ParentsName">Parent Name</option>
-              <option value="PhoneNumber">Phone Number</option>
-              <option value="DateOfBirth">Date of Birth</option>
-              <option value="TotalAmount">Fees</option>
             </select>
 
             {/* Sort Direction Toggle */}

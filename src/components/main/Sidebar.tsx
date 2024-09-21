@@ -17,6 +17,7 @@ const Sidebar = () => {
       });
       navigate("login");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("auth");
     } catch (error) {
       console.log("Logout => ", error);
     }

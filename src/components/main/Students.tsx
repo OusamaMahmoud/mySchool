@@ -39,9 +39,9 @@ const Students = () => {
   const [targetStuId, setTargetStuId] = useState(0);
   const { student, setStudent } = useStudent({ id: targetStuId });
 
-  const closeModal = () => {
+  const closeModal = (label: string) => {
     const modal = document.getElementById(
-      "my_modal_1"
+      `${label}`
     ) as HTMLDialogElement | null;
     modal?.close();
   };
@@ -74,7 +74,53 @@ const Students = () => {
     setPageNumber(1); // Reset to the first page when searching
   };
 
+  const validate = () => {
+    const {
+      address,
+      dateOfBirth,
+      fee: { numberOfInstallments, totalAmount },
+      gradeId,
+      name,
+      parentsName,
+      phoneNumber,
+    } = student;
+    if (!name) {
+      toast.error("Name is Not Found!");
+      return false;
+    }
+    if (!parentsName) {
+      toast.error("Parents Name is Not Found!");
+      return false;
+    }
+    if (!phoneNumber) {
+      toast.error("Phone Number is Not Found!");
+      return false;
+    }
+    if (!gradeId) {
+      toast.error("Grade is Not Found!");
+      return false;
+    }
+    if (!address) {
+      toast.error("Address is Not Found!");
+      return false;
+    }
+    if (!dateOfBirth) {
+      toast.error("Date Of Birth is Not Found!");
+      return false;
+    }
+    if (!numberOfInstallments) {
+      toast.error("Number Of Installments is Not Found!");
+      return false;
+    }
+    if (!totalAmount) {
+      toast.error("Total Amount is Not Found!");
+      return false;
+    }
+    return true;
+  };
+
   const handleStudentEditing = async () => {
+    if (!validate()) return;
     try {
       setIsLoading(true);
       await apiClient.put(`Students/${targetStuId}`, student, {
@@ -86,7 +132,7 @@ const Students = () => {
         prev.map((stu) => (stu.id === student.id ? student : stu))
       );
       setIsLoading(false);
-      closeModal();
+      closeModal('my_modal_1');
     } catch (error: any) {
       console.log("edit =>", error);
       setIsLoading(false);
@@ -94,15 +140,16 @@ const Students = () => {
     }
   };
 
-  const handleStudentDelete = async (id: number) => {
+  const handleStudentDelete = async () => {
     try {
       setIsLoading(true);
-      await apiClient.delete(`Students/${id}`);
+      await apiClient.delete(`Students/${targetStuId}`);
       setIsLoading(false);
       toast.success("Deleted successfully!", {
         position: "top-right", // Position the toast on the top-right
       });
-      setStudents(students.filter((student) => student.id !== id));
+      setStudents(students.filter((st) => st.id !== targetStuId));
+      closeModal('my_modal_3');
     } catch (error: any) {
       console.log("delete =>", error);
       setIsLoading(false);
@@ -241,6 +288,7 @@ const Students = () => {
                 {grades?.find((g) => g.id === Number(stu.gradeId))?.gradeName}
               </td>
               <td className="flex flex-col gap-2 md:flex-row md:gap-0">
+                {/* Edit A Student */}
                 <dialog
                   id="my_modal_1"
                   className="modal"
@@ -412,6 +460,8 @@ const Students = () => {
                     </button>
                   </div>
                 </dialog>
+
+                {/* Delete A Student! */}
                 <dialog
                   id="my_modal_3"
                   className="modal"
@@ -439,7 +489,7 @@ const Students = () => {
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleStudentDelete(stu.id);
+                        handleStudentDelete();
                       }}
                     >
                       Delete

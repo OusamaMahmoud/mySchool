@@ -7,6 +7,8 @@ export interface EducationalStage {
 }
 
 const useEduStages = () => {
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
+
   const [educationalStages, setEducationalStages] = useState<
     EducationalStage[]
   >([]);
@@ -14,7 +16,9 @@ const useEduStages = () => {
   useEffect(() => {
     const getEducationalStages = async () => {
       try {
-        const res = await apiClient.get("/EducationalStages");
+        const res = await apiClient.get(
+          `/EducationalStages?searchTerm=${searchQuery}`
+        );
         setEducationalStages(res.data);
         console.log(res.data);
       } catch (error) {
@@ -22,11 +26,12 @@ const useEduStages = () => {
       }
     };
     getEducationalStages();
-  }, []);
+  }, [searchQuery]);
 
   return {
     educationalStages,
     setEducationalStages,
+    setSearchQuery
   };
 };
 export default useEduStages;

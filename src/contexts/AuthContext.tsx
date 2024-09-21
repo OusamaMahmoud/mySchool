@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string, user: any) => {
     localStorage.setItem("authToken", token);
+    localStorage.setItem("auth", user.username);
     setAuth({ token, payload: user });
   };
 

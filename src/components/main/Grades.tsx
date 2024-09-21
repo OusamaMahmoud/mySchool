@@ -26,11 +26,11 @@ const Grades = () => {
   const [targetGrade, setTargetGrade] = useState<Grade>({} as Grade);
   const [targetGradeId, setTargetGradeId] = useState("");
   const [isLoading] = useState(false);
-  // const [error, setError] = useState("");
   const [newGrade, setNewGrade] = useState({
     gradeName: "",
     educationalStageId: "",
   });
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
 
   const { educationalStages } = useEduStages();
 
@@ -51,7 +51,7 @@ const Grades = () => {
   useEffect(() => {
     const getGrades = async () => {
       try {
-        const res = await apiClient.get("/Grades");
+        const res = await apiClient.get(`/Grades?searchTerm=${searchQuery}`);
         setGrades(res.data);
         console.log(res.data);
       } catch (error) {
@@ -59,7 +59,7 @@ const Grades = () => {
       }
     };
     getGrades();
-  }, []);
+  }, [searchQuery]);
 
   // Create A Grade
   const handleCreateGrade = async () => {
@@ -133,9 +133,8 @@ const Grades = () => {
     const tableColumn = ["Grade Name", "Educational Stage"];
     const tableRows = grades.map((grad) => [
       grad.gradeName,
-      educationalStages?.find(
-        (edu) => grad?.educationalStageId === edu?.id
-      )?.name || 'N/A',
+      educationalStages?.find((edu) => grad?.educationalStageId === edu?.id)
+        ?.name || "N/A",
     ]);
 
     doc.autoTable({
@@ -340,7 +339,13 @@ const Grades = () => {
           </button>
         </div>
       </dialog>
-
+      <div>
+        <input
+          className="input input-bordered"
+          placeholder="Searching..."
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+        />
+      </div>
       <div className="flex justify-end gap-4">
         <button
           onClick={(e) => {
