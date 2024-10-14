@@ -74,7 +74,7 @@ const Sidebar = () => {
   ];
   const normal = `font-heading tracking-wider  flex items-center gap-2 text-white cursor-pointer hover:text-[#091F5B] hover:bg-gray-400 mb-2 p-2 rounded-e-md text-lg hover:pl-4 transition-all duration-200`;
   return (
-    <div className="min-h-screen bg-[#091F5B] w-[300px] shadow-2xl rounded-md p-4 pl-1">
+    <div className="min-h-screen bg-[#091F5B] lg:w-[400px] shadow-2xl rounded-md p-4 pl-1">
       <ToastContainer />
       <dialog id="my_modal_5" className="modal">
         <div className="modal-box">

@@ -35,6 +35,7 @@ const useStudents = () => {
         const students = await apiClient.get(
           `/Students?searchTerm=${searchQuery}&sortBy=${sortBy}&sortDirection=${sortDirection}&pageNumber=${pageNumber}&pageSize=${pageSize}`
         );
+        console.log(students)
         if (students.data.length < pageSize) {
           setHasMore(false); // If the number of students fetched is less than pageSize, there are no more students.
         } else {

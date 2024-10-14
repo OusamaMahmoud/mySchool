@@ -3,6 +3,7 @@ import { apiClient } from "../../services/api-client";
 import { toast } from "react-toastify";
 import { CgAdd } from "react-icons/cg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { FcNext, FcPrevious } from "react-icons/fc";
 
 interface Admin {
   userName: string;
@@ -12,6 +13,12 @@ interface Admin {
 
 const Accounts = () => {
   const [users, setUsers] = useState<Admin[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1); // Keep track of the current page
+  const [pageSize] = useState(8); // Page size can be fixed or dynamic
+  const [hasMore, setHasMore] = useState(true); // To know if there are more students to fetch
+  const [sortBy, setSortBy] = useState("Name"); // Default sorting by name
+  const [sortDirection, setSortDirection] = useState("asc"); // Default ascending order
   const [searchQuery, setSearchQuery] = useState("");
   const [newAccount, setNewAccount] = useState({
     userName: "",
@@ -22,16 +29,39 @@ const Accounts = () => {
 
   useEffect(() => {
     const getAccounts = async () => {
+      setIsLoading(true);
       try {
-        const res = await apiClient.get(`Account/users?searchTerm=${searchQuery}`);
+        const res = await apiClient.get(
+          `Account/users?searchTerm=${searchQuery}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+        );
+        if (res.data.length < pageSize) {
+          setHasMore(false); // If the number of users fetched is less than pageSize, there are no more users.
+        } else {
+          setHasMore(true); // If the number of users fetched is less than pageSize, there are no more users.
+        }
+
         setUsers(res.data);
+        setIsLoading(false);
       } catch (error) {
-        console.log(error);
+        console.log("fetch accounts error => ", error);
+        setIsLoading(false);
       }
     };
     getAccounts();
-  }, [searchQuery]);
+  }, [pageNumber, sortBy, sortDirection, searchQuery]);
 
+
+  const handleNextPage = () => {
+    if (hasMore) {
+      setPageNumber(pageNumber + 1); // Load the next page
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1); // Go to the previous page
+    }
+  };
   const validateAccount = (): boolean => {
     const { userName, password, confirmPassword } = newAccount;
     if (!userName.trim()) {
@@ -91,8 +121,8 @@ const Accounts = () => {
         "my_modal_7"
       ) as HTMLDialogElement | null;
       modal?.close();
-    } catch (error) {
-      toast.error("Failed to create account.");
+    } catch (error: any) {
+      toast.error(`Failed to create account because ${error.response.data}.`);
     }
   };
 
@@ -176,7 +206,11 @@ const Accounts = () => {
                 "my_modal_7"
               ) as HTMLDialogElement | null;
               modal?.close();
-              setNewAccount({ confirmPassword: "", password: "", userName: "" });
+              setNewAccount({
+                confirmPassword: "",
+                password: "",
+                userName: "",
+              });
             }}
             className="btn mr-3"
           >
@@ -210,7 +244,7 @@ const Accounts = () => {
           className="flex gap-1 items-center justify-center btn bg-[#091F5B] text-white mb-8"
         >
           <CgAdd className="text-xl mr-1" />
-          Add New Educational Stage
+          Add New Admin Account
         </button>
       </div>
       <table className="table w-full">
@@ -236,6 +270,24 @@ const Accounts = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end gap-6 mt-4 mb-6 ">
+        <button
+          className="btn btn-accent text-white"
+          onClick={handlePreviousPage}
+          disabled={pageNumber === 1}
+        >
+          <FcPrevious />
+          {isLoading && pageNumber === 1 ? "Loading..." : "Previous Page"}
+        </button>
+
+        <button
+          className="btn btn-accent text-white"
+          onClick={handleNextPage}
+          disabled={!hasMore}
+        >
+          {isLoading ? "Loading..." : "Next Page"} <FcNext />
+        </button>
+      </div>
     </div>
   );
 };

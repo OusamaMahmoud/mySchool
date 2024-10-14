@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-
 const Navbar = () => {
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   useEffect(() => {
     const name = localStorage.getItem("auth");
     if (name) {
@@ -10,7 +9,10 @@ const Navbar = () => {
     }
   }, []);
   return (
-    <div className="w-full p-4 flex justify-end  shadow-lg rounded-sm">
+    <div className="w-full p-8 flex justify-between items-center  shadow-xl rounded-sm">
+      <h1 className="text-lg font-heading text-[#091F5B]">
+        School Management System
+      </h1>
       <div className="flex justify-center items-center gap-2">
         <h1 className="text-lg capitalize">{userName}</h1>
         <img

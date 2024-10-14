@@ -6,6 +6,9 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { UserOptions } from "jspdf-autotable";
+import { useEffect, useState } from "react";
+import { Installment } from "./TargetFee";
+import { apiClient } from "../../services/api-client";
 // Add this type declaration
 declare module "jspdf" {
   interface jsPDF {
@@ -49,6 +52,7 @@ const Fees = () => {
     setSearchQuery(e.target.value);
     setPageNumber(1); // Reset to the first page when searching
   };
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Fees List", 20, 10);
@@ -92,6 +96,55 @@ const Fees = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees");
     XLSX.writeFile(workbook, "fees_list.xlsx");
+  };
+  const [installments, setInstallments] = useState<Installment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log(students);
+    let feeIds: number[];
+    if (students) {
+      feeIds = students.map((stu) => {
+        return stu?.fee?.id;
+      });
+      console.log(feeIds);
+    }
+
+    const getInstallments = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Create an array of promises for each feeId
+        const requests = feeIds.map((feeId) =>
+          apiClient.get(`/installments/fee/${feeId}`)
+        );
+
+        // Use Promise.all to resolve all requests in parallel
+        const responses = await Promise.all(requests);
+
+        // Combine all the installments from each response
+        const allInstallments = responses.flatMap((res) => res.data[0]);
+
+        // Update the state with the combined installments
+        setInstallments(allInstallments);
+      } catch (err) {
+        setError("Failed to fetch installments");
+        console.error("Error fetching installments: ", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getInstallments();
+  }, [students]);
+
+  const getRemainingBalance = (idx:number): number => {
+    if (!installments[idx]) return 0;
+    return installments[idx]?.fee?.amountPerInstallment > installments[idx]?.amount
+      ? installments[idx]?.remainingBalance
+      : Number(installments[idx]?.fee?.totalAmount);
   };
 
   return (
@@ -148,11 +201,12 @@ const Fees = () => {
             <th className="text-left  ">Fees</th>
             <th className="text-left  ">Installments</th>
             <th className="text-left  ">Amount Per Installment</th>
+            <th className="text-left  ">Remaining Balance</th>
             <th className="text-left  ">Action</th>
           </tr>
         </thead>
         <tbody>
-          {students?.map((stu) => (
+          {students?.map((stu ,idx) => (
             <tr key={stu?.id}>
               <td className="text-lg font-bold font-heading capitalize">
                 {stu?.name}
@@ -163,8 +217,19 @@ const Fees = () => {
               <td className="">{stu?.fee?.totalAmount}</td>
               <td className="">{stu?.fee?.numberOfInstallments}</td>
               <td className="">{stu?.fee?.amountPerInstallment}</td>
+              {/* <td className="">
+                {installments &&
+                  installments?.find(
+                    (installment) => installment?.feeId == stu?.fee.id
+                  )?.remainingBalance}
+              </td> */}
+              <td> {installments[idx] ? getRemainingBalance(idx) : ""}</td>
               <td
-                onClick={() => navigate(`/fees/${stu.fee.id}`)}
+                onClick={() =>
+                  navigate(`/fees/${stu.fee.id}`, {
+                    state: { studentName: stu?.name },
+                  })
+                }
                 className="btn hover:bg-[#1a2f6c] bg-[#091F5B]  text-white my-1"
               >
                 Pay
