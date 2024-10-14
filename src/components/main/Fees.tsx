@@ -98,8 +98,8 @@ const Fees = () => {
     XLSX.writeFile(workbook, "fees_list.xlsx");
   };
   const [installments, setInstallments] = useState<Installment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setLoading] = useState(false);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log(students);

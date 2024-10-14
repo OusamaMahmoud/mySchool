@@ -17,8 +17,8 @@ const Accounts = () => {
   const [pageNumber, setPageNumber] = useState(1); // Keep track of the current page
   const [pageSize] = useState(8); // Page size can be fixed or dynamic
   const [hasMore, setHasMore] = useState(true); // To know if there are more students to fetch
-  const [sortBy, setSortBy] = useState("Name"); // Default sorting by name
-  const [sortDirection, setSortDirection] = useState("asc"); // Default ascending order
+  const [sortBy, ] = useState("Name"); // Default sorting by name
+  const [sortDirection, ] = useState("asc"); // Default ascending order
   const [searchQuery, setSearchQuery] = useState("");
   const [newAccount, setNewAccount] = useState({
     userName: "",
