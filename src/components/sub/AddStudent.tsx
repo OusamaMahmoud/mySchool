@@ -71,7 +71,6 @@ const AddStudent = () => {
           "Content-Type": "application/json",
         },
       });
-      setIsLoading(false);
       toast.success("Good Job, you have successfully Create Student Account.", {
         position: "top-center", // Change position to top-center
         style: {
@@ -82,6 +81,7 @@ const AddStudent = () => {
         },
       });
       setTimeout(() => {
+        setIsLoading(false);
         navigate("/students");
       }, 1500);
     } catch (error) {
@@ -264,6 +264,7 @@ const AddStudent = () => {
         <div className="flex justify-start items-center w-full mt-2">
           <button
             onClick={handleCreateStudent}
+            disabled={isLoading}
             className={`btn btn-accent mb-8  ${
               isLoading ? "animate-pulse" : ""
             } `}

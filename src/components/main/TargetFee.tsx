@@ -20,6 +20,7 @@ const TargetFee = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { studentName } = location.state || { studentName: 9 }; // Default to 0 if not passed
+  const [isPayingLoading, setPayingLoading] = useState(false);
   useEffect(() => {
     const getFeeInstallments = async () => {
       try {
@@ -44,9 +45,7 @@ const TargetFee = () => {
       return;
     }
     if (amount > getRemainingBalance()) {
-      toast.warning(
-        "The entered amount exceeds the remaining installment."
-      );
+      toast.warning("The entered amount exceeds the remaining installment.");
       return;
     }
 
@@ -55,6 +54,7 @@ const TargetFee = () => {
       amountPaid: amount,
     };
     try {
+      setPayingLoading(true);
       const res = await apiClient.post(
         `/installments/pay?installmentId=${requestedObj.installmentId}&amountPaid=${requestedObj.amountPaid}`,
         {
@@ -74,12 +74,14 @@ const TargetFee = () => {
         },
       });
       setTimeout(() => {
+        setPayingLoading(false);
         navigate("/fees", {
           state: { remainingBalance: res?.data?.remainingBalance },
         }); // Pass the remaining balance to fees page
       }, 2000);
     } catch (error: any) {
       console.log("Not Pay!! =>", error);
+      setPayingLoading(false);
       toast.error(error.response.data);
     }
   };
@@ -150,9 +152,10 @@ const TargetFee = () => {
           />
           <button
             onClick={handlePayBtn}
+            disabled={isPayingLoading}
             className="btn bg-[#091F5B]  mt-2 text-white w-28"
           >
-            Pay
+            {isPayingLoading ? "Paying..." : "Pay"}
           </button>
         </div>
       </div>

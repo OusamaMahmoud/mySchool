@@ -132,7 +132,7 @@ const Students = () => {
         prev.map((stu) => (stu.id === student.id ? student : stu))
       );
       setIsLoading(false);
-      closeModal('my_modal_1');
+      closeModal("my_modal_1");
     } catch (error: any) {
       console.log("edit =>", error);
       setIsLoading(false);
@@ -149,7 +149,7 @@ const Students = () => {
         position: "top-right", // Position the toast on the top-right
       });
       setStudents(students.filter((st) => st.id !== targetStuId));
-      closeModal('my_modal_3');
+      closeModal("my_modal_3");
     } catch (error: any) {
       console.log("delete =>", error);
       setIsLoading(false);
