@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../../services/api-client";
 import { toast } from "react-toastify";
-import { CgAdd, CgEditBlackPoint, CgEditMarkup } from "react-icons/cg";
+import { CgAdd} from "react-icons/cg";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcNext, FcPrevious } from "react-icons/fc";
 import { FaEdit } from "react-icons/fa";
@@ -108,7 +108,7 @@ const Accounts = () => {
   };
 
   const validateUpdatedAccount = (): boolean => {
-    const { userName, password, confirmPassword } = newAccount;
+    const {  password, confirmPassword } = newAccount;
     if (password.length < 4) {
       toast.error("Password must be at least 6 characters long.", {
         position: "top-center", // Change position to top-center

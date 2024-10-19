@@ -37,7 +37,6 @@ const Students = () => {
   const { grades } = useGrades();
   const [isStuEditingLoading, setIsStuEditingLoading] = useState(false);
   const [isStuDeletingLoading, setIsStuDeletingLoading] = useState(false);
-  const [, setError] = useState("");
   const [targetStuId, setTargetStuId] = useState(0);
   const { student, setStudent } = useStudent({ id: targetStuId });
 

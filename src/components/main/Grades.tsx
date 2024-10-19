@@ -35,7 +35,7 @@ const Grades = () => {
   const [searchQuery, setSearchQuery] = useState(""); // New state for search query
 
   const { educationalStages } = useEduStages();
-  const [isFetchGradesLoading, setIsFetchGradesLoading] = useState(false);
+  const [, setIsFetchGradesLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1); // Keep track of the current page
   const [pageSize] = useState(8); // Page size can be fixed or dynamic
   const [hasMore, setHasMore] = useState(true); // To know if there are more students to fetch
