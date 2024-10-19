@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
 import { toast, ToastContainer } from "react-toastify";
+import SchoolSkeleton from "../sub/SchoolSkeleton";
 export interface Installment {
   id: number;
   amount: number;
@@ -96,6 +97,7 @@ const TargetFee = () => {
       : Number(installments[0]?.fee?.totalAmount);
   };
 
+  if(installments.length <= 0) return <SchoolSkeleton />
   return (
     <div>
       <div className="bg-[#091F5B] h-36 flex justify-between items-center ">

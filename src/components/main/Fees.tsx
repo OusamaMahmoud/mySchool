@@ -9,6 +9,7 @@ import { UserOptions } from "jspdf-autotable";
 import { useEffect, useState } from "react";
 import { Installment } from "./TargetFee";
 import { apiClient } from "../../services/api-client";
+import SchoolSkeleton from "../sub/SchoolSkeleton";
 // Add this type declaration
 declare module "jspdf" {
   interface jsPDF {
@@ -146,6 +147,7 @@ const Fees = () => {
       ? installments[idx]?.remainingBalance
       : Number(installments[idx]?.fee?.totalAmount);
   };
+  if(students.length <= 0) return <SchoolSkeleton />
 
   return (
     <div className="overflow-x-auto mt-10">

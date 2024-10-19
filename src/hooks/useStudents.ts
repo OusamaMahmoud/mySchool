@@ -10,6 +10,7 @@ export interface Student {
     amountPerInstallment: string;
     numberOfInstallments: string;
     totalAmount: string;
+    remainingBalance:string;
   };
   parentsName: string;
   address: string;
@@ -30,21 +31,21 @@ const useStudents = () => {
   const [searchQuery, setSearchQuery] = useState(""); // New state for search query
   useEffect(() => {
     const fetchStudents = async () => {
-      setIsLoading(true);
       try {
+        setIsLoading(true);
         const students = await apiClient.get(
           `/Students?searchTerm=${searchQuery}&sortBy=${sortBy}&sortDirection=${sortDirection}&pageNumber=${pageNumber}&pageSize=${pageSize}`
         );
-        console.log(students)
         if (students.data.length < pageSize) {
           setHasMore(false); // If the number of students fetched is less than pageSize, there are no more students.
         } else {
           setHasMore(true); // If the number of students fetched is less than pageSize, there are no more students.
         }
         setStudents(students.data);
-        console.log("is=>", students.data);
+        setIsLoading(false);
       } catch (error) {
         console.log("is this stu error? ", error);
+        setIsLoading(false);
       }
     };
     fetchStudents();

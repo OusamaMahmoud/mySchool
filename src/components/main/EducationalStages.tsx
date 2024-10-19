@@ -9,6 +9,8 @@ import { UserOptions } from "jspdf-autotable";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { FcNext, FcPrevious } from "react-icons/fc";
+import SchoolSkeleton from "../sub/SchoolSkeleton";
 // Add this type declaration
 declare module "jspdf" {
   interface jsPDF {
@@ -25,8 +27,14 @@ const EducationalStages = () => {
     name: "",
   });
 
-  const { educationalStages, setEducationalStages, setSearchQuery } =
-    useEduStages();
+  const {
+    educationalStages,
+    setEducationalStages,
+    setSearchQuery,
+    hasMore,
+    pageNumber,
+    setPageNumber,
+  } = useEduStages();
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -72,6 +80,10 @@ const EducationalStages = () => {
 
   // Create A Grade
   const handleCreateEducationalStage = async () => {
+    if (!newEducationalStage.name) {
+      toast.error("Please Provide Student Educational Stage.");
+      return;
+    }
     try {
       await apiClient.post("/EducationalStages", newEducationalStage, {
         headers: {
@@ -79,10 +91,12 @@ const EducationalStages = () => {
         },
       });
       toast.success("Successfully Create Educational Stage.");
+      setNewEducationalStage({ name: "" });
       const modal = document.getElementById(
         "my_modal_1"
       ) as HTMLDialogElement | null;
       modal?.close();
+
       const getEducationalStages = async () => {
         try {
           const res = await apiClient.get("/EducationalStages");
@@ -140,7 +154,20 @@ const EducationalStages = () => {
       console.log(error);
     }
   };
+  const handleNextPage = () => {
+    if (hasMore) {
+      setPageNumber(pageNumber + 1); // Load the next page
+    }
+  };
 
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1); // Go to the previous page
+    }
+  };
+
+  if(educationalStages.length <= 0) return <SchoolSkeleton />
+  
   return (
     <div className="overflow-x-auto mt-10">
       {/* Add New Grade */}
@@ -159,6 +186,7 @@ const EducationalStages = () => {
               <input
                 type="text"
                 className="input input-bordered min-w-80"
+                value={newEducationalStage.name}
                 onChange={(e) =>
                   setNewEducationalStage({
                     ...newEducationalStage,
@@ -358,6 +386,24 @@ const EducationalStages = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end gap-6 mt-4 mb-6 ">
+        <button
+          className="btn btn-accent text-white"
+          onClick={handlePreviousPage}
+          disabled={pageNumber === 1}
+        >
+          <FcPrevious />
+          {isLoading && pageNumber === 1 ? "Loading..." : "Previous Page"}
+        </button>
+
+        <button
+          className="btn btn-accent text-white"
+          onClick={handleNextPage}
+          disabled={!hasMore}
+        >
+          {isLoading ? "Loading..." : "Next Page"} <FcNext />
+        </button>
+      </div>
     </div>
   );
 };

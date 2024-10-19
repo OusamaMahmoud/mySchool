@@ -32,9 +32,11 @@ const Students = () => {
     setSortDirection,
     searchQuery,
     setSearchQuery,
+    isLoading
   } = useStudents();
   const { grades } = useGrades();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isStuEditingLoading, setIsStuEditingLoading] = useState(false);
+  const [isStuDeletingLoading, setIsStuDeletingLoading] = useState(false);
   const [, setError] = useState("");
   const [targetStuId, setTargetStuId] = useState(0);
   const { student, setStudent } = useStudent({ id: targetStuId });
@@ -45,13 +47,6 @@ const Students = () => {
     ) as HTMLDialogElement | null;
     modal?.close();
   };
-
-  // const openModal = () => {
-  //   const modal = document.getElementById(
-  //     "my_modal_1"
-  //   ) as HTMLDialogElement | null;
-  //   modal?.showModal();
-  // };
 
   const handleSortDirectionChange = () => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -122,7 +117,7 @@ const Students = () => {
   const handleStudentEditing = async () => {
     if (!validate()) return;
     try {
-      setIsLoading(true);
+      setIsStuEditingLoading(true);
       await apiClient.put(`Students/${targetStuId}`, student, {
         headers: {
           "Content-Type": "application/json", // Set the correct content type
@@ -131,20 +126,21 @@ const Students = () => {
       setStudents((prev) =>
         prev.map((stu) => (stu.id === student.id ? student : stu))
       );
-      setIsLoading(false);
+      setIsStuEditingLoading(false);
+      toast.success("Student Account has been updated successfully.");
       closeModal("my_modal_1");
     } catch (error: any) {
       console.log("edit =>", error);
-      setIsLoading(false);
-      setError(error.message);
+      setIsStuEditingLoading(false);
+      toast.error(error.message);
     }
   };
 
   const handleStudentDelete = async () => {
     try {
-      setIsLoading(true);
+      setIsStuDeletingLoading(true);
       await apiClient.delete(`Students/${targetStuId}`);
-      setIsLoading(false);
+      setIsStuDeletingLoading(false);
       toast.success("Deleted successfully!", {
         position: "top-right", // Position the toast on the top-right
       });
@@ -152,8 +148,8 @@ const Students = () => {
       closeModal("my_modal_3");
     } catch (error: any) {
       console.log("delete =>", error);
-      setIsLoading(false);
-      setError(error.message);
+      setIsStuDeletingLoading(false);
+      toast.error(error.message);
     }
   };
 
@@ -204,6 +200,7 @@ const Students = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
     XLSX.writeFile(workbook, "students_list.xlsx");
   };
+
   return (
     <div className="overflow-x-auto mt-10">
       <div className="flex flex-col gap-4 justify-between  mb-6">
@@ -287,7 +284,7 @@ const Students = () => {
               <td className="">
                 {grades?.find((g) => g.id === Number(stu.gradeId))?.gradeName}
               </td>
-              <td className="flex flex-col gap-2 md:flex-row md:gap-0">
+              <td className="flex flex-col mt-2 gap-2 md:flex-row md:gap-0">
                 {/* Edit A Student */}
                 <dialog
                   id="my_modal_1"
@@ -400,23 +397,6 @@ const Students = () => {
                         </select>
                       </div>
                       <div className="flex flex-col gap-2 ">
-                        <h1 className="font-bold">Total Amount</h1>
-                        <input
-                          type="text"
-                          className="input input-bordered min-w-80"
-                          value={student?.fee?.totalAmount}
-                          onChange={(e) =>
-                            setStudent({
-                              ...student,
-                              fee: {
-                                ...student.fee,
-                                totalAmount: e.currentTarget.value,
-                              },
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2 ">
                         <h1 className="font-bold">Number of Installments</h1>
                         <input
                           type="text"
@@ -449,14 +429,14 @@ const Students = () => {
                     </button>
                     <button
                       className={`btn px-8 bg-[#091F5B] text-white  ${
-                        isLoading ? "animate-ping" : ""
+                        isStuEditingLoading ? "animate-ping" : ""
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStudentEditing();
                       }}
                     >
-                      Edit
+                     {isStuEditingLoading? "Editing..." : "Edit"}
                     </button>
                   </div>
                 </dialog>
@@ -484,18 +464,17 @@ const Students = () => {
                       Close
                     </button>
                     <button
-                      className={`btn px-8 btn-warning text-white  ${
-                        isLoading ? "animate-ping" : ""
-                      }`}
+                      className={`btn px-8 btn-warning text-white `}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleStudentDelete();
                       }}
                     >
-                      Delete
+                      {isStuDeletingLoading ? "Deleting..." : " Delete"}
                     </button>
                   </div>
                 </dialog>
+
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

@@ -7,9 +7,9 @@ const Layout = () => {
   const isLoginPage = location.pathname === "/login"; // Replace '/login' with your login route
 
   return (
-    <div className="flex">
+    <div className="flex ">
       {!isLoginPage && <Sidebar />}
-      <div className="container mx-auto px-20 w-full flex flex-col">
+      <div className="container mx-auto px-10 w-full flex flex-col">
         {!isLoginPage && <Navbar />}
         <div>
           <Outlet />

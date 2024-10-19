@@ -9,6 +9,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { UserOptions } from "jspdf-autotable";
+import { FcNext, FcPrevious } from "react-icons/fc";
+import SchoolSkeleton from "../sub/SchoolSkeleton";
 
 // Add this type declaration
 declare module "jspdf" {
@@ -33,6 +35,10 @@ const Grades = () => {
   const [searchQuery, setSearchQuery] = useState(""); // New state for search query
 
   const { educationalStages } = useEduStages();
+  const [isFetchGradesLoading, setIsFetchGradesLoading] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1); // Keep track of the current page
+  const [pageSize] = useState(8); // Page size can be fixed or dynamic
+  const [hasMore, setHasMore] = useState(true); // To know if there are more students to fetch
 
   // Get A Specific Grade.
   useEffect(() => {
@@ -51,18 +57,35 @@ const Grades = () => {
   useEffect(() => {
     const getGrades = async () => {
       try {
-        const res = await apiClient.get(`/Grades?searchTerm=${searchQuery}`);
+        const res = await apiClient.get(
+          `/Grades?searchTerm=${searchQuery}&&pageNumber=${pageNumber}&pageSize=${pageSize}`
+        );
+        if (res.data.length < pageSize) {
+          setHasMore(false); // If the number of students fetched is less than pageSize, there are no more students.
+        } else {
+          setHasMore(true); // If the number of students fetched is less than pageSize, there are no more students.
+        }
+        setIsFetchGradesLoading(false);
         setGrades(res.data);
         console.log(res.data);
       } catch (error) {
         console.log(error);
+        setIsFetchGradesLoading(false);
       }
     };
     getGrades();
-  }, [searchQuery]);
+  }, [searchQuery, pageNumber]);
 
   // Create A Grade
   const handleCreateGrade = async () => {
+    if (!newGrade.gradeName) {
+      toast.error("Please Provide Student Grade Name.");
+      return;
+    }
+    if (!newGrade.educationalStageId) {
+      toast.error("Please Provide Student Educational Stage.");
+      return;
+    }
     try {
       await apiClient.post("/Grades", newGrade, {
         headers: {
@@ -70,6 +93,7 @@ const Grades = () => {
         },
       });
       toast.success("Successfully Create Grade.");
+      setNewGrade({ educationalStageId: "", gradeName: "" });
       const modal = document.getElementById(
         "my_modal_1"
       ) as HTMLDialogElement | null;
@@ -159,6 +183,18 @@ const Grades = () => {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Grades");
     XLSX.writeFile(workbook, "Grades_list.xlsx");
   };
+  const handleNextPage = () => {
+    if (hasMore) {
+      setPageNumber(pageNumber + 1); // Load the next page
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (pageNumber > 1) {
+      setPageNumber(pageNumber - 1); // Go to the previous page
+    }
+  };
+  if(grades.length <= 0) return <SchoolSkeleton />
 
   return (
     <div className="overflow-x-auto mt-10">
@@ -175,6 +211,7 @@ const Grades = () => {
               <input
                 type="text"
                 className="input input-bordered min-w-80"
+                value={newGrade.gradeName}
                 onChange={(e) =>
                   setNewGrade({
                     ...newGrade,
@@ -188,6 +225,7 @@ const Grades = () => {
             <div className="flex flex-col gap-2 ">
               <h1 className="font-bold">Educational Stage</h1>
               <select
+                value={newGrade.educationalStageId}
                 onChange={(e) =>
                   setNewGrade({
                     ...newGrade,
@@ -427,6 +465,24 @@ const Grades = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-end gap-6 mt-4 mb-6 ">
+        <button
+          className="btn btn-accent text-white"
+          onClick={handlePreviousPage}
+          disabled={pageNumber === 1}
+        >
+          <FcPrevious />
+          {isLoading && pageNumber === 1 ? "Loading..." : "Previous Page"}
+        </button>
+
+        <button
+          className="btn btn-accent text-white"
+          onClick={handleNextPage}
+          disabled={!hasMore}
+        >
+          {isLoading ? "Loading..." : "Next Page"} <FcNext />
+        </button>
+      </div>
     </div>
   );
 };
